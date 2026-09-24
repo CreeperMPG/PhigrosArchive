@@ -206,15 +206,11 @@ namespace PhigrosArchive
             if (saveInfo != null)
             {
                 Progress("\nUploading summary ......");
-                try
-                {
-                    await PhigrosPlayerInfoExtensions.UploadSummaryAsync(
-                        SessionToken, UserObjectID, saveInfo, newCloudInfo.FileObjectID).ConfigureAwait(false);
-                }
-                catch { }
+                await PhigrosPlayerInfoExtensions.UploadSaveAsync(
+                    SessionToken, UserObjectID, saveInfo, newCloudInfo.FileObjectID).ConfigureAwait(false);
             }
 
-            return newCloudInfo; 
+            return newCloudInfo;
         }
 
         // ── Token 刷新 ──
@@ -301,6 +297,36 @@ namespace PhigrosArchive
             using var client = HttpUtils.CreatePigeonHttpClient(sessionToken);
             var response = await client.PutAsync(
                 $"{HttpUtils.PigeonSaveApiUrl}/{saveInfo.CloudInfo.SaveInfoObjectID}", content)
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Failed to upload summary: {response.ReasonPhrase}");
+        }
+        public static async Task UploadSaveAsync(
+            string sessionToken, string userObjectID, SaveFileInfo saveInfo, string newFileObjectID)
+        {
+            if (saveInfo.CloudInfo == null)
+                throw new InvalidOperationException("Cloud info is missing.");
+
+            var dateTime = DateTime.Now;
+            string iso = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fff") + "Z";
+            var saveData = new
+            {
+                summary = saveInfo.Summary?.ToBase64String() ?? "",
+                modifiedAt = new { __type = "Date", iso },
+                gameFile = new { __type = "Pointer", className = "_File", objectId = newFileObjectID },
+                ACL = new Dictionary<string, object>
+                {
+                    [userObjectID] = new { read = true, write = true }
+                },
+                user = new { __type = "Pointer", className = "_User", objectId = userObjectID },
+                name = ".save"
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(saveData), Encoding.UTF8, "application/json");
+            using var client = HttpUtils.CreatePigeonHttpClient(sessionToken);
+            var response = await client.PostAsync(
+                $"{HttpUtils.PigeonSaveApiUrl}", content)
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
