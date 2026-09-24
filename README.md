@@ -1,6 +1,10 @@
+# \**DEPRECATED / 已废弃**
+
+## 重构后的新项目：[PhiKits.Save](/CreeperMPG/PhiKits.Save)
+
 # PhigrosArchive
 
-Phigros 云端 API 封装与工具库，为 **PhigrosShell** 和 **PhiShell Studio** 提供基础能力。
+Phigros 云端 API 封装与工具库。
 
 ## 功能
 
