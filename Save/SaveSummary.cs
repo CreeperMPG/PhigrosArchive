@@ -49,14 +49,8 @@ namespace PhigrosArchive.Save
                 SaveVersion = reader.ReadByte();
                 Challenge = reader.ReadUInt16();
                 RankingScore = reader.ReadSingle();
-                //GameVersion = reader.ReadByte();
-                //MythByte = reader.ReadByte();
                 GameVersion = BitUtils.ReadProtobufVarInt(reader);
-                reader.ReadByte(); // 跳过 1 字节填充
-
-                int avatarLen = data[9];
-                byte[] avatarBytes = reader.ReadBytes(avatarLen);
-                Avatar = Encoding.UTF8.GetString(avatarBytes);
+                Avatar = BitUtils.ReadString(reader);
 
                 var achievements = new Achievement[4];
                 for (int i = 0; i < 4; i++)
@@ -90,11 +84,20 @@ namespace PhigrosArchive.Save
 
             try
             {
-                foreach (var a in Achievements.GetArray())
+                if (Achievements != null)
                 {
-                    writer.Write(a.Cleared);
-                    writer.Write(a.FullCombo);
-                    writer.Write(a.Phi);
+                    foreach (var a in Achievements.GetArray())
+                    {
+                        writer.Write(a.Cleared);
+                        writer.Write(a.FullCombo);
+                        writer.Write(a.Phi);
+                    }
+                }
+                else
+                {
+                    writer.Write(114);
+                    writer.Write(514);
+                    writer.Write(1919);
                 }
             }
             catch { }
