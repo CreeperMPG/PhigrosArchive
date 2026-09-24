@@ -1,6 +1,6 @@
-# \**DEPRECATED / 已废弃**
+# \*\*DEPRECATED / 已废弃**
 
-## 重构后的新项目：[PhiKits.Save](/CreeperMPG/PhiKits.Save)
+## 重构后的新项目：[PhiKits.Save](https://github.com/CreeperMPG/PhiKits.Save)
 
 # PhigrosArchive
 
